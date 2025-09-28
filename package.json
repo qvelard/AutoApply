@@ -1,0 +1,43 @@
+{
+  "dependencies": {
+    "@langchain/core": "^0.3.77",
+    "@langchain/ollama": "^0.2.4",
+    "@langchain/openai": "^0.6.13",
+    "axios": "^1.12.2",
+    "bullmq": "^5.58.9",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "langchain": "^0.3.34",
+    "mammoth": "^1.11.0",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.25.76"
+  },
+  "name": "autoapply",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/pdf-parse": "^1.1.5",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js & node dist/worker.js",
+    "dev": "ts-node src/server.ts & ts-node src/worker.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qvelard/AutoApply.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/qvelard/AutoApply/issues"
+  },
+  "homepage": "https://github.com/qvelard/AutoApply#readme"
+}
