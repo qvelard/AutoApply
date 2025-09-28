@@ -196,25 +196,50 @@ ${cvText.substring(0, 4000)}`; // Limit input size
 // Fallback function using regex patterns
 const extractPersonalInfoFallback = (cvText: string) => {
     const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})\b/g;
+    // More robust phone regex to handle various formats including French numbers
+    const phoneRegex = /(\+?\d{1,4}[-.\s]?)?\(?(\d{1,4})\)?[-.\s]?(\d{1,4})[-.\s]?(\d{1,4})[-.\s]?(\d{1,4})?[-.\s]?(\d{1,4})?\b/g;
 
     const email = emailRegex.exec(cvText)?.[0] || '';
-    const phone = phoneRegex.exec(cvText)?.[0] || '';
+    const phoneMatch = phoneRegex.exec(cvText);
+    let phone = phoneMatch ? phoneMatch[0] : '';
+
+    // Clean up phone number (remove extra spaces and normalize)
+    phone = phone.replace(/\s+/g, ' ').trim();
 
     // Try to extract name (this is more complex, look for patterns at the top)
-    const lines = cvText.split('\n').slice(0, 10); // First 10 lines
+    const lines = cvText.split('\n').slice(0, 15); // First 15 lines for better coverage
     let firstName = '';
     let lastName = '';
 
     for (const line of lines) {
         const trimmed = line.trim();
         if (trimmed && !trimmed.includes('@') && !phoneRegex.test(trimmed)) {
-            const words = trimmed.split(/\s+/);
+            // Remove phone numbers from the line if they're mixed with name
+            let cleanLine = trimmed.replace(phoneRegex, '').trim();
+
+            // Also try to remove email if it's on the same line
+            cleanLine = cleanLine.replace(emailRegex, '').trim();
+
+            const words = cleanLine.split(/\s+/).filter(word => word.length > 1); // Filter out single chars
             if (words.length >= 2) {
                 firstName = words[0];
                 lastName = words.slice(1).join(' ');
+                // Clean up any remaining artifacts
+                lastName = lastName.replace(/[^\w\s-]/g, '').trim();
                 break;
+            } else if (words.length === 1 && !firstName) {
+                // If only one word found, check if it could be a first name
+                firstName = words[0];
             }
+        }
+    }
+
+    // If we didn't find a proper last name, try to split the first long word
+    if (!lastName && firstName.includes('+')) {
+        const parts = firstName.split('+');
+        if (parts.length >= 2) {
+            firstName = parts[0].trim();
+            // The rest might be phone or other info, ignore for name
         }
     }
 
@@ -342,15 +367,18 @@ Personal Information (use this for the letter header):
 - Phone: ${personalInfo.phone}
 - Address: ${personalInfo.address}
 
+CRITICAL LENGTH CONSTRAINT: The cover letter MUST fit on a single A4 page. The header (name, contact info, date) will take approximately 40% of the page. You have only about 400-500 words maximum for the main content.
+
+MOST IMPORTANT GUIDELINES: Don't use any * or ** or - or --
+
 The cover letter should be:
-- Concise (max 1 page)
 - Formal yet engaging
 - Highlight most relevant experiences and skills
 - Clear structure: introduction, motivation, skills alignment, strong closing
 - Confident, enthusiastic tone adapted to the company
 - Include the candidate's contact information at the top
 
-Write the cover letter content (without the header information, as it will be added to the PDF separately):`;
+Write the cover letter content (without the header information, as it will be added to the PDF separately). Keep it brief - aim for 300-400 words maximum.`;
 
         const response = await llm.invoke(prompt);
         const coverLetterText = response as string;

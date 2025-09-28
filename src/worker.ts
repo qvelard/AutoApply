@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import * as fs from 'fs/promises';
-import { processJobData, generateCoverLetter } from './agents.mjs';
+import { processJobData, generateCoverLetter } from './cover_letter_agents.mjs';
 import { automateApplication } from './automation';
 
 // Worker

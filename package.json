@@ -29,7 +29,10 @@
     "build": "tsc",
     "start": "node dist/server.js & node dist/worker.js",
     "dev": "ts-node src/server.ts & ts-node src/worker.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:validate && npm run test:quick && npm run test:simple && npm run test:full",
+    "test:validate": "node tests/validate.mjs",
+    "test:quick": "npx ts-node tests/test_cover_letter_agents/quick_test.ts",
+    "test:full": "npx ts-node tests/test_cover_letter_agents/test_cover_letter_agents.ts"
   },
   "repository": {
     "type": "git",
